@@ -8,12 +8,14 @@ from mcp.server.fastmcp import Context, FastMCP
 try:
     # When installed as a package
     from .analysis import ThoughtAnalyzer
+    from .codex_profile import build_codex_guidance
     from .logging_conf import configure_logging
     from .models import ThoughtData, ThoughtStage
     from .storage import ThoughtStorage
 except ImportError:
     # When run directly
     from mcp_sequential_thinking.analysis import ThoughtAnalyzer
+    from mcp_sequential_thinking.codex_profile import build_codex_guidance
     from mcp_sequential_thinking.logging_conf import configure_logging
     from mcp_sequential_thinking.models import ThoughtData, ThoughtStage
     from mcp_sequential_thinking.storage import ThoughtStorage
@@ -37,6 +39,8 @@ def process_thought(
     tags: List[str] = [],
     axioms_used: List[str] = [],
     assumptions_challenged: List[str] = [],
+    workspace: str = "",
+    task_kind: str = "",
     ctx: Optional[Context] = None,
 ) -> dict:
     """Add a sequential thought with its metadata.
@@ -50,6 +54,8 @@ def process_thought(
         tags: Optional keywords or categories for the thought
         axioms_used: Optional list of principles or axioms used in this thought
         assumptions_challenged: Optional list of assumptions challenged by this thought
+        workspace: Optional local workspace or repository path for Codex-task guidance
+        task_kind: Optional task type hint for Codex-task guidance
         ctx: Optional MCP context object
 
     Returns:
@@ -87,6 +93,13 @@ def process_thought(
 
         # Analyze the thought
         analysis = ThoughtAnalyzer.analyze_thought(thought_data, all_thoughts)
+        if workspace or task_kind:
+            analysis["thoughtAnalysis"]["codexGuidance"] = build_codex_guidance(
+                task_description=thought,
+                workspace=workspace,
+                task_kind=task_kind,
+                tags=tags,
+            )
 
         # Log success
         logger.info(f"Successfully processed thought #{thought_number}")
@@ -95,6 +108,50 @@ def process_thought(
     except Exception as e:
         logger.error(f"Error processing thought: {str(e)}")
 
+        return {"error": str(e), "status": "failed"}
+
+
+@mcp.tool()
+def plan_codex_task(
+    task_description: str,
+    workspace: str = "",
+    task_kind: str = "",
+    tags: List[str] = [],
+    constraints: List[str] = [],
+) -> dict:
+    """Build workflow guidance for a Codex task before implementation.
+
+    Args:
+        task_description: The user's task or the current implementation goal
+        workspace: Optional local workspace or repository path
+        task_kind: Optional task type hint, such as review, ci, docs, or remote-ops
+        tags: Optional keywords or categories for the task
+        constraints: Optional constraints that should shape execution
+
+    Returns:
+        dict: Recommended tools, execution rules, verification checks, and memory keywords
+    """
+    try:
+        logger.info("Planning Codex task guidance")
+        guidance = build_codex_guidance(
+            task_description=task_description,
+            workspace=workspace,
+            task_kind=task_kind,
+            tags=tags,
+            constraints=constraints,
+        )
+        return {
+            "codexTaskPlan": {
+                "taskDescription": task_description,
+                "workspace": workspace,
+                "taskKind": task_kind,
+                "tags": tags,
+                "constraints": constraints,
+                "guidance": guidance,
+            }
+        }
+    except Exception as e:
+        logger.error(f"Error planning Codex task: {str(e)}")
         return {"error": str(e), "status": "failed"}
 
 

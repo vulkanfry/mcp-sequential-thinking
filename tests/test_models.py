@@ -9,7 +9,9 @@ class TestThoughtStage(unittest.TestCase):
 
     def test_from_string_valid(self):
         """Test converting valid strings to ThoughtStage enum values."""
-        self.assertEqual(ThoughtStage.from_string("Problem Definition"), ThoughtStage.PROBLEM_DEFINITION)
+        self.assertEqual(
+            ThoughtStage.from_string("Problem Definition"), ThoughtStage.PROBLEM_DEFINITION
+        )
         self.assertEqual(ThoughtStage.from_string("Research"), ThoughtStage.RESEARCH)
         self.assertEqual(ThoughtStage.from_string("Analysis"), ThoughtStage.ANALYSIS)
         self.assertEqual(ThoughtStage.from_string("Synthesis"), ThoughtStage.SYNTHESIS)
@@ -31,7 +33,7 @@ class TestThoughtData(unittest.TestCase):
             thought_number=1,
             total_thoughts=3,
             next_thought_needed=True,
-            stage=ThoughtStage.PROBLEM_DEFINITION
+            stage=ThoughtStage.PROBLEM_DEFINITION,
         )
         self.assertTrue(thought.validate())
 
@@ -45,7 +47,7 @@ class TestThoughtData(unittest.TestCase):
                 thought_number=0,  # Invalid: must be positive
                 total_thoughts=3,
                 next_thought_needed=True,
-                stage=ThoughtStage.PROBLEM_DEFINITION
+                stage=ThoughtStage.PROBLEM_DEFINITION,
             )
 
     def test_validate_invalid_total_thoughts(self):
@@ -58,7 +60,7 @@ class TestThoughtData(unittest.TestCase):
                 thought_number=3,
                 total_thoughts=2,  # Invalid: less than thought_number
                 next_thought_needed=True,
-                stage=ThoughtStage.PROBLEM_DEFINITION
+                stage=ThoughtStage.PROBLEM_DEFINITION,
             )
 
     def test_validate_empty_thought(self):
@@ -71,7 +73,7 @@ class TestThoughtData(unittest.TestCase):
                 thought_number=1,
                 total_thoughts=3,
                 next_thought_needed=True,
-                stage=ThoughtStage.PROBLEM_DEFINITION
+                stage=ThoughtStage.PROBLEM_DEFINITION,
             )
 
     def test_to_dict(self):
@@ -84,7 +86,7 @@ class TestThoughtData(unittest.TestCase):
             stage=ThoughtStage.PROBLEM_DEFINITION,
             tags=["tag1", "tag2"],
             axioms_used=["axiom1"],
-            assumptions_challenged=["assumption1"]
+            assumptions_challenged=["assumption1"],
         )
 
         # Save the timestamp for comparison
@@ -99,7 +101,7 @@ class TestThoughtData(unittest.TestCase):
             "tags": ["tag1", "tag2"],
             "axiomsUsed": ["axiom1"],
             "assumptionsChallenged": ["assumption1"],
-            "timestamp": timestamp
+            "timestamp": timestamp,
         }
 
         self.assertEqual(thought.to_dict(), expected_dict)
@@ -115,7 +117,7 @@ class TestThoughtData(unittest.TestCase):
             "tags": ["tag1", "tag2"],
             "axiomsUsed": ["axiom1"],
             "assumptionsChallenged": ["assumption1"],
-            "timestamp": "2023-01-01T12:00:00"
+            "timestamp": "2023-01-01T12:00:00",
         }
 
         thought = ThoughtData.from_dict(data)

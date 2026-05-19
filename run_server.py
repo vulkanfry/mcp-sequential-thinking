@@ -7,8 +7,8 @@ import os
 import sys
 
 # Set environment variables for proper encoding
-os.environ['PYTHONIOENCODING'] = 'utf-8'
-os.environ['PYTHONUNBUFFERED'] = '1'
+os.environ["PYTHONIOENCODING"] = "utf-8"
+os.environ["PYTHONUNBUFFERED"] = "1"
 
 # Ensure stdout is clean before importing any modules
 sys.stdout.flush()

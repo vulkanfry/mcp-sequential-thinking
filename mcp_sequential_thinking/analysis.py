@@ -2,6 +2,7 @@ from collections import Counter
 from datetime import datetime
 from typing import Any, Dict, List
 
+from .codex_profile import build_codex_guidance
 from .logging_conf import configure_logging
 from .models import ThoughtData, ThoughtStage
 
@@ -184,7 +185,7 @@ class ThoughtAnalyzer:
         progress = (thought.thought_number / thought.total_thoughts) * 100
 
         # Create analysis
-        return {
+        thought_analysis = {
             "thoughtAnalysis": {
                 "currentThought": {
                     "thoughtNumber": thought.thought_number,
@@ -215,3 +216,9 @@ class ThoughtAnalyzer:
                 },
             }
         }
+        thought_analysis["thoughtAnalysis"]["codexGuidance"] = build_codex_guidance(
+            task_description=thought.thought,
+            tags=thought.tags,
+        )
+
+        return thought_analysis

@@ -2,6 +2,16 @@
 
 ## Version 0.5.0 (Unreleased)
 
+### Codex Workflow Fork Additions
+
+- Added `plan_codex_task` MCP tool for Codex-specific execution guidance before implementation
+- Added `codexGuidance` to thought analysis for matched GitHub review/CI, Rust MEV/REVM, Codex tooling, live-run readiness, staged-diff, remote-ops, and docs task patterns
+- Added ordered `nextActions`, `primaryRule`, and `profileDepth` to make guidance directly executable
+- Added live-run readiness, staged-diff review, skill/agent binding, broad-scan delegation, and config-provenance profiles
+- Added README guidance for using this fork from `~/.codex/config.toml`
+- Updated package source metadata to point at the fork while preserving the upstream URL
+- Excluded local analysis databases, virtualenvs, caches, and previous build outputs from source distributions
+
 ### Code Quality Improvements
 
 #### 1. Separation of Test Code from Production Code

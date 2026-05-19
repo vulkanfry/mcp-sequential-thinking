@@ -1,5 +1,3 @@
-[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/arben-adm-mcp-sequential-thinking-badge.png)](https://mseep.ai/app/arben-adm-mcp-sequential-thinking)
-
 # Sequential Thinking MCP Server
 
 A Model Context Protocol (MCP) server that facilitates structured, progressive thinking through defined stages. This tool helps break down complex problems into sequential thoughts, track the progression of your thinking process, and generate summaries.
@@ -14,6 +12,7 @@ A Model Context Protocol (MCP) server that facilitates structured, progressive t
 
 - **Structured Thinking Framework**: Organizes thoughts through standard cognitive stages (Problem Definition, Research, Analysis, Synthesis, Conclusion)
 - **Thought Tracking**: Records and manages sequential thoughts with metadata
+- **Codex Task Guidance**: Adds workflow hints for GitHub review/CI, Rust MEV/REVM runtime work, Codex MCP/hooks, live-run readiness, staged-diff review, remote ops, and docs tasks
 - **Related Thought Analysis**: Identifies connections between similar thoughts
 - **Progress Monitoring**: Tracks your position in the overall thinking sequence
 - **Summary Generation**: Creates concise overviews of the entire thought process
@@ -22,6 +21,33 @@ A Model Context Protocol (MCP) server that facilitates structured, progressive t
 - **Extensible Architecture**: Easily customize and extend functionality
 - **Robust Error Handling**: Graceful handling of edge cases and corrupted data
 - **Type Safety**: Comprehensive type annotations and validation
+
+## Codex Workflow Fork
+
+This fork keeps the upstream MCP protocol intact and adds a small local profile for the work patterns we repeatedly use in Codex:
+
+- GitHub PR review comments, Actions failures, and thread resolution
+- Rust MEV/arbitrage/REVM/CEXDEX runtime changes
+- Codex MCP, skill, hook, and instruction-surface maintenance
+- Live-run readiness, cache catch-up, startup env/config/token/checkpoint wiring
+- Staged-diff-first review, dead wrapper cleanup, and docs tied to the actual diff
+- Skill import, Superpowers/agent binding, and broad codebase scan delegation
+- Exact config/env provenance and override precedence questions
+- Remote SSH/systemd/node operations where live host proof matters
+- Docs and architecture artifacts that must stay grounded in the real code surface
+
+Two additions matter for Codex:
+
+- `process_thought` now returns `thoughtAnalysis.codexGuidance` when the thought text or tags match these task patterns.
+- `plan_codex_task` returns recommended tools, execution rules, ordered next actions, verification checks, memory keywords, and risk flags before implementation starts.
+
+Example Codex config:
+
+```toml
+[mcp_servers.sequential-thinking]
+command = "uvx"
+args = ["--from", "git+https://github.com/vulkanfry/mcp-sequential-thinking", "--with", "portalocker", "mcp-sequential-thinking"]
+```
 
 ## Prerequisites
 
@@ -168,7 +194,7 @@ If you've installed the package globally with `pip install -e .`:
       "command": "uvx",
       "args": [
         "--from",
-        "git+https://github.com/arben-adm/mcp-sequential-thinking",
+        "git+https://github.com/vulkanfry/mcp-sequential-thinking",
         "--with",
         "portalocker",
         "mcp-sequential-thinking"
@@ -307,7 +333,7 @@ Add to your Gemini CLI settings at `~/.gemini/settings.json`:
       "command": "uvx",
       "args": [
         "--from",
-        "git+https://github.com/arben-adm/mcp-sequential-thinking",
+        "git+https://github.com/vulkanfry/mcp-sequential-thinking",
         "--with",
         "portalocker",
         "mcp-sequential-thinking"
@@ -326,7 +352,7 @@ The server maintains a history of thoughts and processes them through a structur
 
 ## Usage Guide
 
-The Sequential Thinking server exposes five main tools:
+The Sequential Thinking server exposes six main tools:
 
 ### 1. `process_thought`
 
@@ -347,6 +373,8 @@ Records and analyzes a new thought in your sequential thinking process.
 - `tags` (list of strings, optional): Keywords or categories for your thought
 - `axioms_used` (list of strings, optional): Principles or axioms applied in your thought
 - `assumptions_challenged` (list of strings, optional): Assumptions your thought questions or challenges
+- `workspace` (string, optional): Local workspace path used to tailor Codex guidance
+- `task_kind` (string, optional): Task type hint such as `review`, `ci`, `docs`, or `remote-ops`
 
 **Example:**
 
@@ -364,7 +392,54 @@ process_thought(
 )
 ```
 
-### 2. `generate_summary`
+When Codex task patterns match, the response includes:
+
+```json
+{
+  "thoughtAnalysis": {
+    "codexGuidance": {
+      "matchedRules": ["github-review-ci", "mev-rust-runtime"],
+      "recommendedTools": ["GitHub connector", "gh cli", "git", "rg", "cargo test"],
+      "executionRules": [
+        "Inspect GitHub review comments, threads, or Actions logs directly before guessing.",
+        "Trace the runtime path from the diff before editing."
+      ],
+      "nextActions": [
+        "Fetch review comments, unresolved threads, or Actions logs before editing."
+      ],
+      "verificationChecks": [
+        "Run targeted cargo tests plus cargo fmt/clippy when Rust files change."
+      ],
+      "primaryRule": "github-review-ci",
+      "profileDepth": 2
+    }
+  }
+}
+```
+
+### 2. `plan_codex_task`
+
+Builds Codex-specific workflow guidance before implementation.
+
+**Parameters:**
+
+- `task_description` (string): The user's task or implementation goal
+- `workspace` (string, optional): Local workspace path
+- `task_kind` (string, optional): Task type hint
+- `tags` (list of strings, optional): Keywords or categories for the task
+- `constraints` (list of strings, optional): Constraints that should shape execution
+
+**Example:**
+
+```python
+plan_codex_task(
+    task_description="Fix GitHub review comments and failing CI for the REVM PR",
+    workspace="/Users/vulkanfry/ezilmev/bot+disc/arbitrage",
+    tags=["revm", "github", "ci"]
+)
+```
+
+### 3. `generate_summary`
 
 Generates a summary of your entire thinking process.
 
@@ -392,11 +467,11 @@ Generates a summary of your entire thinking process.
 }
 ```
 
-### 3. `clear_history`
+### 4. `clear_history`
 
 Resets the thinking process by clearing all recorded thoughts.
 
-### 4. `export_session`
+### 5. `export_session`
 
 Exports the current thinking session to a JSON file for sharing or backup.
 
@@ -410,7 +485,7 @@ Exports the current thinking session to a JSON file for sharing or backup.
 export_session(file_path="/home/user/exports/my-analysis.json")
 ```
 
-### 5. `import_session`
+### 6. `import_session`
 
 Imports a previously exported thinking session from a JSON file.
 
@@ -456,6 +531,3 @@ For detailed examples of how to customize and extend the Sequential Thinking ser
 ## License
 
 MIT License
-
-
-
